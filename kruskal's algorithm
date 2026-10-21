@@ -1,0 +1,88 @@
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Edge {
+    int u, v, weight;
+};
+
+bool compare(Edge a, Edge b) {
+    return a.weight < b.weight;
+}
+
+int parent[100];
+int rnk[100];
+
+int find(int x) {
+    if (parent[x] != x)
+        parent[x] = find(parent[x]);
+    return parent[x];
+}
+
+void unite(int u, int v) {
+    int rootU = find(u);
+    int rootV = find(v);
+
+    if (rootU == rootV)
+        return;
+
+    if (rnk[rootU] < rnk[rootV])
+        parent[rootU] = rootV;
+    else if (rnk[rootU] > rnk[rootV])
+        parent[rootV] = rootU;
+    else {
+        parent[rootV] = rootU;
+        rnk[rootU]++;
+    }
+}
+
+int main() {
+    int V, E;
+    cout << "Enter number of vertices and edges: ";
+    cin >> V >> E;
+
+    vector<Edge> edges(E);
+
+    cout << "Enter edges (u v weight):\n";
+    for (int i = 0; i < E; i++) {
+        cin >> edges[i].u >> edges[i].v
+            >> edges[i].weight;
+    }
+
+    sort(edges.begin(), edges.end(), compare);
+
+    for (int i = 1; i <= V; i++) {
+        parent[i] = i;
+        rnk[i] = 0;
+    }
+
+    int totalWeight = 0, count = 0;
+
+    cout << "\nEdges in Minimum Spanning Tree:\n";
+
+    for (Edge e : edges) {
+        if (find(e.u) != find(e.v)) {
+            unite(e.u, e.v);
+
+            cout << e.u << " - " << e.v
+                 << " : " << e.weight << "\n";
+
+            totalWeight += e.weight;
+            count++;
+
+            if (count == V - 1)
+                break;
+        }
+    }
+
+    if (count != V - 1) {
+        cout << "Graph is disconnected. MST does not exist.\n";
+    } else {
+        cout << "Total Minimum Cost = "
+             << totalWeight << "\n";
+    }
+
+    return 0;
+}
